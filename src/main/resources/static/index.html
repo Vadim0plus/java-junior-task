@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>React + Spring</title>
+</head>
+<body>
+<div id='react'></div>
+
+
+
+<script src="//fb.me/react-0.14.3.min.js"></script>
+<script src="//fb.me/react-dom-0.14.3.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<script type="text/babel">
+
+    function loadDoc() {
+        var xhttp = new XMLHttpRequest();
+        var clients = [];
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                clients = JSON.parse(this.responseText);
+            }
+        };
+        xhttp.open("GET", "/debts/show-all-clients", false);
+        xhttp.send();
+        console.log(clients);
+        return clients;
+    }
+
+    var App = React.createClass({
+        getInitialState: function() {
+            return {clients: []};
+        },
+        componentDidMount: function() {
+                    this.setState({clients: loadDoc()});
+        },
+        render: function() {
+            return (<ClientsList clients={this.state.clients}/>);
+        }
+    });
+
+    var ClientsList = React.createClass({
+        render: function() {
+            var rows = [];
+            this.props.clients.forEach(function(client) {
+                rows.push(<Client client={client} />);
+            });
+            return (
+                    <div className="container">
+                        <table className="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>Client ID</th><th>Client Name</th><th>Total Debt</th>
+                            </tr>
+                            </thead>
+                            <tbody>{rows}</tbody>
+                    </table>
+                    </div>
+            )
+        }
+    });
+
+    var Client = React.createClass({
+        render: function() {
+            return (
+                    <tr>
+                        <td>{this.props.client.id}</td>
+                        <td>{this.props.client.name}</td>
+                        <td>{this.props.client.totalDebt}</td>
+                    </tr>
+            )
+        }
+    });
+
+    ReactDOM.render(
+            <App />,
+        document.getElementById('react')
+    )
+</script>
+</body>
+</html>
