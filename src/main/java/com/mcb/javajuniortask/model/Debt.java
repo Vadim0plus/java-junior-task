@@ -19,4 +19,20 @@ public class Debt {
     @ManyToOne
     @JoinColumn(name = "client_id")
     private Client client;
+
+    @Override
+    public boolean equals(Object o) {
+        if(o == null) {
+            return false;
+        }
+        if(!Debt.class.isAssignableFrom(o.getClass())) {
+            return false;
+        }
+        final Debt other = (Debt) o;
+        if ((this.id == null) ? (other.id != null) : !this.id.equals(other.id)) {
+            return false;
+        }
+        return true;
+    }
+
 }

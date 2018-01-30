@@ -23,4 +23,9 @@ public class Client {
     @OneToMany(mappedBy = "client")
     @Cascade(CascadeType.ALL)
     List<Debt> debts = new LinkedList<>();
+
+    @OneToMany(mappedBy = "client")
+    @Cascade(CascadeType.ALL)
+    List<Pay> pays = new LinkedList<>();
+
 }

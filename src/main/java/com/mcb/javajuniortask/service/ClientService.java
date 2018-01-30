@@ -3,6 +3,7 @@ package com.mcb.javajuniortask.service;
 import com.mcb.javajuniortask.dto.ClientDTO;
 import com.mcb.javajuniortask.model.Client;
 import com.mcb.javajuniortask.model.Debt;
+import com.mcb.javajuniortask.model.Pay;
 import com.mcb.javajuniortask.repository.ClientRepository;
 
 import org.springframework.shell.standard.ShellComponent;
@@ -55,6 +56,52 @@ public class ClientService {
         client.getDebts().add(debt);
         clientRepository.save(client);
         return debt.getId();
+    }
+
+    @ShellMethod("Pays for specified client debt")
+    @Transactional
+    public UUID payToClientDebt(@ShellOption UUID clientId,
+                                @ShellOption UUID debtId,
+                                @ShellOption BigDecimal value) {
+        if(clientId == null) {
+            throw new NullPointerException("clientId was null");
+        }
+        if(debtId == null) {
+            throw new NullPointerException("clientId was null");
+        }
+        if(value == null) {
+            throw new NullPointerException("clientId was null");
+        }
+        if(value.floatValue() < 0) {
+            throw new IllegalArgumentException("Pay value was less than zero");
+        }
+        Client client = clientRepository.findOne(clientId);
+        if (client == null) {
+            throw new RuntimeException("Client Record not found");
+        }
+        Debt debt = new Debt();
+        debt.setId(debtId);
+        int idx = client.getDebts().indexOf(debt);
+        if (idx < 0) {
+            throw new RuntimeException("Debt Record not found");
+        }
+        Debt clientDebt = client.getDebts().get(idx);
+        BigDecimal oldValue = clientDebt.getValue();
+        /* We assume that it is not allowed to pay a debt less than zero */
+        if (oldValue.compareTo(value) < 0) {
+            throw new RuntimeException("it is not allowed to pay a debt less than zero");
+        }
+        if (oldValue.compareTo(value) == 0) {
+            client.getDebts().remove(clientDebt);
+        }
+        clientDebt.setValue(oldValue.subtract(value));
+        Pay pay = new Pay();
+        pay.setValue(value);
+        pay.setId(UUID.randomUUID());
+        pay.setClient(client);
+        pay.setDebt(clientDebt);
+        client.getPays().add(pay);
+        return pay.getId();
     }
 
 }
